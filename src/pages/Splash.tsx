@@ -37,9 +37,9 @@ const Splash = () => {
           </Button>
 
           <Button 
-            variant="outline" 
+            variant="secondary" 
             size="lg" 
-            className="w-full border-white/30 text-white hover:bg-white/10"
+            className="w-full"
             onClick={() => navigate("/home")}
           >
             Try Demo
