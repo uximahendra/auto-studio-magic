@@ -35,7 +35,7 @@ const Processing = () => {
   const overallProgress = ((currentStep * 100 + progress) / processingSteps.length);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent via-accent/95 to-accent/90 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/3 left-1/4 w-64 h-64 bg-primary rounded-full blur-3xl animate-pulse" />
