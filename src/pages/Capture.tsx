@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { exteriorAngles, interiorAngles } from "@/lib/mockData";
 import { toast } from "sonner";
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { Capacitor } from '@capacitor/core';
 
 const Capture = () => {
   const navigate = useNavigate();
@@ -34,6 +36,20 @@ const Capture = () => {
   // Initialize camera
   useEffect(() => {
     const initCamera = async () => {
+      // Skip camera initialization for native platforms - we'll use Capacitor Camera API
+      if (Capacitor.isNativePlatform()) {
+        try {
+          // Request camera permissions on native
+          await Camera.requestPermissions();
+        } catch (error) {
+          console.error("Camera permission error:", error);
+          setCameraError("Camera permission denied. Please enable camera access in your device settings.");
+          toast.error("Camera permission denied");
+        }
+        return;
+      }
+
+      // Web browser camera initialization
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { 
@@ -65,7 +81,30 @@ const Capture = () => {
     };
   }, []);
 
-  const handleCapture = () => {
+  const handleCapture = async () => {
+    // Use Capacitor Camera API for native platforms
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const photo = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Camera
+        });
+
+        if (photo.dataUrl) {
+          setCapturedImage(photo.dataUrl);
+          setCaptured(true);
+          toast.success("Photo captured!");
+        }
+      } catch (error) {
+        console.error("Camera capture error:", error);
+        toast.error("Failed to capture photo");
+      }
+      return;
+    }
+
+    // Web browser camera capture
     if (!videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
@@ -142,7 +181,13 @@ const Capture = () => {
                 size="lg"
                 onClick={async () => {
                   setCaptured(false);
-                  // Restart camera
+                  
+                  // For native platforms, just call handleCapture again
+                  if (Capacitor.isNativePlatform()) {
+                    return;
+                  }
+                  
+                  // Restart web camera
                   try {
                     const stream = await navigator.mediaDevices.getUserMedia({
                       video: { 
